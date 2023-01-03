@@ -12,7 +12,6 @@ public class GameDirector : MonoBehaviour
     // ゲームオブジェクト
     GameObject[] monaka = new GameObject[5];
     GameObject[] person = new GameObject[3];
-    GameObject[] tpoint = new GameObject[3];
     GameObject monako;
     GameObject clearArea;
     GameObject tapmes;
@@ -21,6 +20,8 @@ public class GameDirector : MonoBehaviour
     GameObject TextHighScore;
     GameObject TextPoint;
     GameObject wallend;
+
+    GameObject canvas;
 
     // スワイプ量計測
     float startPos = 0.0f;
@@ -44,33 +45,34 @@ public class GameDirector : MonoBehaviour
         person[0] = GameObject.Find("sonota0");
         person[1] = GameObject.Find("sonota1");
         person[2] = GameObject.Find("sonota2");
-        tpoint[0] = GameObject.Find("Point0");
-        tpoint[1] = GameObject.Find("Point1");
-        tpoint[2] = GameObject.Find("Point2");
         monako = GameObject.Find("monako");
         clearArea = GameObject.Find("clear");
         tapmes = GameObject.Find("tap");
         swipemes = GameObject.Find("swipe");
         TextScore = GameObject.Find("Score");
         TextHighScore = GameObject.Find("HighScore");
+        TextPoint = GameObject.Find("Point");
         wallend = GameObject.Find("wallEnd");
+        canvas = GameObject.Find("Canvas");
 
-        // とりあえず得点表示を消す
-        for(int i=0; i<3; i++)
-        {
-            tpoint[i].SetActive(false);
-        }
-
-        // もなこちゃんと得点表示とクリアエリアの配置
+        // もなこちゃんとクリアエリアの配置
         int pos = Random.Range(0,3);
         person[pos].SetActive(false);
-        tpoint[pos].SetActive(true);
-        TextPoint = tpoint[pos];
         monako.transform.Translate(4.0f * (float)pos, 0, 0);
         clearArea.transform.Translate(4.0f * (float)pos, 0, 0);
 
         // クリアエリアのセンターの計算
         center = (float)(pos * 4 - 1);
+
+        // もなこちゃんの頭上に得点表示
+        Vector2 pPos;
+        RectTransform TextPointRect = TextPoint.GetComponent<RectTransform>();
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            canvas.GetComponent<RectTransform>(),
+            RectTransformUtility.WorldToScreenPoint(Camera.main, new Vector2(center, 3.5f)), 
+            null, out pPos
+        );
+        TextPointRect.localPosition = pPos;
 
         // スワイプメッセージは消しておく
         swipemes.SetActive(false);
