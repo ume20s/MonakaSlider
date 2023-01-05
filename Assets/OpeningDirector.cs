@@ -10,7 +10,7 @@ public class OpeningDirector : MonoBehaviour
     {
         if(Input.GetMouseButtonDown(0))
         {
-            SceneManager.LoadScene("GameScene1");
+            SceneManager.LoadScene("Game1Scene");
         }
         
     }

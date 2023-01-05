@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class GameDirector : MonoBehaviour
+public class Game1Director : MonoBehaviour
 {
     private int zanki = 4;                  // 着目機（プラス１すると残機数）
     private int phase = 0;                  // 場面状態
@@ -20,8 +21,13 @@ public class GameDirector : MonoBehaviour
     GameObject TextHighScore;
     GameObject TextPoint;
     GameObject wallend;
-
     GameObject canvas;
+
+    // 効果音関連
+    AudioSource audioSource;
+    public AudioClip vOisii;
+    public AudioClip vMouikkai;
+    public AudioClip vTabetakatta;
 
     // スワイプ量計測
     float startPos = 0.0f;
@@ -73,6 +79,9 @@ public class GameDirector : MonoBehaviour
             null, out pPos
         );
         TextPointRect.localPosition = pPos;
+
+        // 効果音のコンポーネントを取得
+        audioSource = GetComponent<AudioSource>();
 
         // スワイプメッセージは消しておく
         swipemes.SetActive(false);
@@ -141,7 +150,7 @@ public class GameDirector : MonoBehaviour
                 TextPoint.GetComponent<Text>().text = point.ToString("D") + "point";
 
                 // もなかが一定速度以下になるか画面外に出たら次の段階
-                if (speed < 0.001 || monaka[zanki].transform.position.x > wallend.transform.position.x)
+                if (speed < 0.002 || monaka[zanki].transform.position.x > wallend.transform.position.x - 3.0f)
                 {
                     phase++;
                 }
@@ -154,6 +163,7 @@ public class GameDirector : MonoBehaviour
                 {
                     // 残機が残っていたら即刻もう１回
                     if (zanki > 0) {
+                        audioSource.PlayOneShot(vMouikkai);
                         monaka[zanki].SetActive(false);
                         zanki--;
                         tapmes.SetActive(true);
@@ -162,21 +172,39 @@ public class GameDirector : MonoBehaviour
                     else
                     {
                         // ゲームオーバー表示
-                        // タップして次のステージ
                         // 未実装
+                        audioSource.PlayOneShot(vTabetakatta);
+                        phase = 6;
                     }
 
                 }
                 else
                 {
+                    // 「おいしい」スコア転送
+                    audioSource.PlayOneShot(vOisii);
+                    StartCoroutine("PointAdd");
+
                     // ステージクリア表示
                     // 未実装
+                    phase = 7;
+                }
+                break;
 
-                    // タップしてスコア転送
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        StartCoroutine("PointAdd");
-                    }
+            // ゲームオーバー
+            case 6:
+                // タップしてオープニングへ
+                if (Input.GetMouseButtonDown(0))
+                {
+                    SceneManager.LoadScene("OpeningScene");
+                }
+                break;
+
+            // ステージクリア
+            case 7:
+                // タップして次のステージへへ
+                if (Input.GetMouseButtonDown(0))
+                {
+                    SceneManager.LoadScene("Game2Scene");
                 }
                 break;
 
