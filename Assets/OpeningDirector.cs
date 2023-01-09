@@ -12,6 +12,5 @@ public class OpeningDirector : MonoBehaviour
         {
             SceneManager.LoadScene("Game1Scene");
         }
-        
     }
 }

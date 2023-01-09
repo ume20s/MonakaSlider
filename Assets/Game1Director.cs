@@ -8,7 +8,8 @@ public class Game1Director : MonoBehaviour
 {
     private int zanki = 4;                  // 着目機（プラス１すると残機数）
     private int phase = 0;                  // 場面状態
-    private bool inAnime = false;           // もなかアニメ中
+    private bool inAnime = false;           // アニメ中
+    private bool passingArea = false;       // クリアエリア通過フラグ
 
     // ゲームオブジェクト
     GameObject[] monaka = new GameObject[5];
@@ -22,6 +23,9 @@ public class Game1Director : MonoBehaviour
     GameObject TextPoint;
     GameObject wallend;
     GameObject canvas;
+
+    // もなこアニメーション用animator
+    Animator animator;
 
     // 効果音関連
     AudioSource audioSource;
@@ -80,10 +84,13 @@ public class Game1Director : MonoBehaviour
         );
         TextPointRect.localPosition = pPos;
 
+        // もなこちゃんアニメーションコンポーネントを取得
+        animator = monako.GetComponent<Animator>();
+
         // 効果音のコンポーネントを取得
         audioSource = GetComponent<AudioSource>();
 
-        // スワイプメッセージは消しておく
+        // 余計なものは消しておく
         swipemes.SetActive(false);
     }
 
@@ -95,11 +102,18 @@ public class Game1Director : MonoBehaviour
             case 0:
                 if (Input.GetMouseButtonDown(0))
                 {
-                    // もなか落ちアニメーション
+                    // 余計なものは非表示に
                     tapmes.SetActive(false);
+
+                    // もなか落ちアニメーション
                     inAnime = true;
                     StartCoroutine("MonakaSet");
                     StartCoroutine("StockDown");
+
+                    // もなこちゃんセッティングアニメに遷移
+                    animator.SetTrigger("SettingTrigger");
+                    passingArea = false;
+
                     phase++;
                 }
                 break;
@@ -146,11 +160,22 @@ public class Game1Director : MonoBehaviour
 
                 // 得点判定
                 point = 100 - (int)(Mathf.Abs(monaka[zanki].transform.position.x - center) * 100 / 2.8f);
-                if (point < 0) point = 0; 
+                if (point > 1) passingArea = true;
+                if (point < 0)
+                {
+                    point = 0;
+                    if(passingArea)
+                    {
+                        // もなこちゃん失敗アニメに遷移
+                        animator.SetTrigger("MissTrigger");
+                        inAnime = true;
+                        passingArea = false;
+                    }
+                } 
                 TextPoint.GetComponent<Text>().text = point.ToString("D") + "point";
 
                 // もなかが一定速度以下になるか画面外に出たら次の段階
-                if (speed < 0.002 || monaka[zanki].transform.position.x > wallend.transform.position.x - 3.0f)
+                if (speed < 0.002 || monaka[zanki].transform.position.x > wallend.transform.position.x - 1.0f)
                 {
                     phase++;
                 }
@@ -161,46 +186,61 @@ public class Game1Director : MonoBehaviour
                 // もし得点が０だったら
                 if(point == 0)
                 {
-                    // 残機が残っていたら即刻もう１回
+                    // アニメしてなかったらもなこちゃん失敗アニメに遷移
+                    if(!inAnime)
+                    {
+                        animator.SetTrigger("MissTrigger2");
+                    }
+                    inAnime = false;
+
+                    // 残機が残っていたらもう１回
                     if (zanki > 0) {
                         audioSource.PlayOneShot(vMouikkai);
-                        monaka[zanki].SetActive(false);
-                        zanki--;
-                        tapmes.SetActive(true);
-                        phase = 0;
+                        phase = 6;
                     }
                     else
                     {
-                        // ゲームオーバー表示
-                        // 未実装
-                        audioSource.PlayOneShot(vTabetakatta);
-                        phase = 6;
+                        // ゲームオーバー
+                        phase = 7;
                     }
 
                 }
                 else
                 {
+                    // もなこちゃんステージクリアアニメに遷移
+                    monaka[zanki].SetActive(false);
+                    animator.SetTrigger("ClearTrigger");
+
                     // 「おいしい」スコア転送
                     audioSource.PlayOneShot(vOisii);
                     StartCoroutine("PointAdd");
 
-                    // ステージクリア表示
-                    // 未実装
-                    phase = 7;
+                    // ステージクリアへ
+                    phase = 8;
                 }
+                break;
+
+            // もう１回
+            case 6:
+                // 失敗もなかを消して残機減
+                monaka[zanki].SetActive(false);
+                zanki--;
+
+                // タップしてセット
+                tapmes.SetActive(true);
+
+                phase = 0;
+
                 break;
 
             // ゲームオーバー
-            case 6:
-                // タップしてオープニングへ
-                if (Input.GetMouseButtonDown(0))
-                {
-                    SceneManager.LoadScene("OpeningScene");
-                }
+            case 7:
+                // ゲームオーバー画面へ
+                SceneManager.LoadScene("GameoverScene");
                 break;
 
             // ステージクリア
-            case 7:
+            case 8:
                 // タップして次のステージへへ
                 if (Input.GetMouseButtonDown(0))
                 {
@@ -248,7 +288,14 @@ public class Game1Director : MonoBehaviour
     // ポイントをスコアに移動追加
     IEnumerator PointAdd()
     {
-        for (int i = point; i >= 0; i--)
+        int i;
+        for(i=0; i<30; i++)
+        {
+            TextPoint.GetComponent<Text>().fontSize +=2;
+            yield return new WaitForSeconds(0.05f);
+        }
+        yield return new WaitForSeconds(2.0f);
+        for (i = point; i >= 0; i--)
         {
             TextPoint.GetComponent<Text>().text = i.ToString("D") + "point";
             TextScore.GetComponent<Text>().text = "Score:" + score.ToString("D4");
