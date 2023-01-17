@@ -426,9 +426,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89925cfa9cfa569469ab086933a42dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  vOisii: {fileID: 8300000, guid: c80ac48376fba5d43b0b2a5d47a6db8a, type: 3}
+  FruitCake: {fileID: 21300000, guid: 848a240c04eb2ea40a8edca9d0a79567, type: 3}
+  FriendFinancier: {fileID: 21300000, guid: 83a7686dc87c60c49b733326ef1c025a, type: 3}
+  FriendCookie: {fileID: 21300000, guid: 5a09ec53aa732c4458bce03b7ee25c8b, type: 3}
+  vMonakaOisii: {fileID: 8300000, guid: c80ac48376fba5d43b0b2a5d47a6db8a, type: 3}
   vMouikkai: {fileID: 8300000, guid: 6f62ec59491252441a8e5aff37b9c0a4, type: 3}
-  vTabetakatta: {fileID: 8300000, guid: 309fb364b9ac8c648aa63b67fb8a4722, type: 3}
 --- !u!4 &229488825
 Transform:
   m_ObjectHideFlags: 0

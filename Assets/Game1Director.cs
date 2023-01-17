@@ -27,11 +27,16 @@ public class Game1Director : MonoBehaviour
     // もなこアニメーション用animator
     Animator animator;
 
+    // もなか以外のお菓子のスプライト
+    public Sptite Sweets;
+    public Sprite FruitCake;
+    public Sprite FriendFinancier;
+    public Sprite FriendCookie;
+
     // 効果音関連
     AudioSource audioSource;
-    public AudioClip vOisii;
+    public AudioClip vMonakaOisii;
     public AudioClip vMouikkai;
-    public AudioClip vTabetakatta;
 
     // スワイプ量計測
     float startPos = 0.0f;
@@ -92,6 +97,9 @@ public class Game1Director : MonoBehaviour
 
         // 余計なものは消しておく
         swipemes.SetActive(false);
+
+        // DEBUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+        // monaka[2].GetComponent<SpriteRenderer>().sprite = fruit;
     }
 
     void Update()
@@ -212,7 +220,7 @@ public class Game1Director : MonoBehaviour
                     animator.SetTrigger("ClearTrigger");
 
                     // 「おいしい」スコア転送
-                    audioSource.PlayOneShot(vOisii);
+                    audioSource.PlayOneShot(vMonakaOisii);
                     StartCoroutine("PointAdd");
 
                     // ステージクリアへ
