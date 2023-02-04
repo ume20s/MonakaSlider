@@ -3,9 +3,7 @@ guid: 89925cfa9cfa569469ab086933a42dc5
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences:
-  - vOisii: {instanceID: 0}
-  - vMouikkai: {instanceID: 0}
+  defaultReferences: []
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

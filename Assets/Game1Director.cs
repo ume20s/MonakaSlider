@@ -10,6 +10,7 @@ public class Game1Director : MonoBehaviour
     private int phase = 0;                  // 場面状態
     private bool inAnime = false;           // アニメ中
     private bool passingArea = false;       // クリアエリア通過フラグ
+    const string SAVE_KEY = "HighScore";    // ハイスコア保存キー
 
     // ゲームオブジェクト
     GameObject[] monaka = new GameObject[5];
@@ -21,22 +22,22 @@ public class Game1Director : MonoBehaviour
     GameObject TextScore;
     GameObject TextHighScore;
     GameObject TextPoint;
+    GameObject TextClear;
     GameObject wallend;
     GameObject canvas;
 
     // もなこアニメーション用animator
     Animator animator;
 
-    // もなか以外のお菓子のスプライト
-    public Sptite Sweets;
-    public Sprite FruitCake;
-    public Sprite FriendFinancier;
-    public Sprite FriendCookie;
+    // お菓子のスプライト
+    public Sprite[] Sweets = new Sprite[4];
 
     // 効果音関連
     AudioSource audioSource;
-    public AudioClip vMonakaOisii;
+    public AudioClip[] vOisii = new AudioClip[4];
+    public AudioClip vTabetaina;
     public AudioClip vMouikkai;
+    private int[] ClearVoice = new int[5] {0,0,0,0,0};
 
     // スワイプ量計測
     float startPos = 0.0f;
@@ -67,8 +68,15 @@ public class Game1Director : MonoBehaviour
         TextScore = GameObject.Find("Score");
         TextHighScore = GameObject.Find("HighScore");
         TextPoint = GameObject.Find("Point");
+        TextClear = GameObject.Find("Clear");
         wallend = GameObject.Find("wallEnd");
         canvas = GameObject.Find("Canvas");
+
+        // スコアとハイスコアの取得
+        score = 0;
+        TextScore.GetComponent<Text>().text = "Score:" + score.ToString("D4");
+        ScoreStrage.HighScore = PlayerPrefs.GetInt(SAVE_KEY, 0);
+        TextHighScore.GetComponent<Text>().text = "HighScore:" + ScoreStrage.HighScore.ToString("D4");
 
         // もなこちゃんとクリアエリアの配置
         int pos = Random.Range(0,3);
@@ -92,14 +100,24 @@ public class Game1Director : MonoBehaviour
         // もなこちゃんアニメーションコンポーネントを取得
         animator = monako.GetComponent<Animator>();
 
-        // 効果音のコンポーネントを取得
+        // 音声のコンポーネントを取得
         audioSource = GetComponent<AudioSource>();
 
         // 余計なものは消しておく
         swipemes.SetActive(false);
+        TextClear.SetActive(false);
 
-        // DEBUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
-        // monaka[2].GetComponent<SpriteRenderer>().sprite = fruit;
+        // ３分の１の確率でランダムに１個だけ鯱もなか以外のものが入る
+        if(Random.Range(0, 3) == 0)
+        {
+            int sPos = Random.Range(0, 5);
+            int sSweets = Random.Range(1, 4);
+            monaka[sPos].GetComponent<SpriteRenderer>().sprite = Sweets[sSweets];
+            ClearVoice[sPos] = sSweets;
+        }
+
+        // 鯱もなかが食べたいセリフ
+        audioSource.PlayOneShot(vTabetaina);
     }
 
     void Update()
@@ -110,6 +128,8 @@ public class Game1Director : MonoBehaviour
             case 0:
                 if (Input.GetMouseButtonDown(0))
                 {
+                    audioSource.Play();
+
                     // 余計なものは非表示に
                     tapmes.SetActive(false);
 
@@ -191,8 +211,10 @@ public class Game1Director : MonoBehaviour
 
             // 判定！
             case 5:
+                audioSource.Stop();     // BGMを止める
+
                 // もし得点が０だったら
-                if(point == 0)
+                if (point == 0)
                 {
                     // アニメしてなかったらもなこちゃん失敗アニメに遷移
                     if(!inAnime)
@@ -219,8 +241,11 @@ public class Game1Director : MonoBehaviour
                     monaka[zanki].SetActive(false);
                     animator.SetTrigger("ClearTrigger");
 
+                    // クリア表示
+                    TextClear.SetActive(true);
+
                     // 「おいしい」スコア転送
-                    audioSource.PlayOneShot(vMonakaOisii);
+                    audioSource.PlayOneShot(vOisii[ClearVoice[zanki]]);
                     StartCoroutine("PointAdd");
 
                     // ステージクリアへ
@@ -234,9 +259,10 @@ public class Game1Director : MonoBehaviour
                 monaka[zanki].SetActive(false);
                 zanki--;
 
-                // タップしてセット
+                // タップしてセットを表示
                 tapmes.SetActive(true);
 
+                // 最初に戻る
                 phase = 0;
 
                 break;
@@ -249,9 +275,25 @@ public class Game1Director : MonoBehaviour
 
             // ステージクリア
             case 8:
-                // タップして次のステージへへ
+                // タップして次のステージへ
                 if (Input.GetMouseButtonDown(0))
                 {
+                    // スコアにポイントを加算
+                    score += point;
+
+                    // ハイスコア処理
+                    if (score > ScoreStrage.HighScore)
+                    {
+                        ScoreStrage.HighScore = score;
+                        TextHighScore.GetComponent<Text>().text = "HighScore:" + score.ToString("D4");
+                        PlayerPrefs.SetInt(SAVE_KEY, score);
+                        PlayerPrefs.Save();
+                    }
+
+                    // 現在のスコアを次のステージに受け継ぐ
+                    ScoreStrage.Score = score;
+
+                    // ステージ２へ
                     SceneManager.LoadScene("Game2Scene");
                 }
                 break;
@@ -261,7 +303,7 @@ public class Game1Director : MonoBehaviour
         }
     }
 
-    // 一番下のがテーブルに大きくなりながら落ちる
+    // 一番下のが大きくなりながらテーブルに落ちる
     IEnumerator MonakaSet()
     {
         for (int i = 0; i < 10; i++)
@@ -296,18 +338,34 @@ public class Game1Director : MonoBehaviour
     // ポイントをスコアに移動追加
     IEnumerator PointAdd()
     {
-        int i;
-        for(i=0; i<30; i++)
+        int i, div, dscore = score;
+
+        // スコアを拡大表示
+        for(i=0; i<10; i++)
         {
-            TextPoint.GetComponent<Text>().fontSize +=2;
+            TextPoint.GetComponent<Text>().fontSize +=3;
             yield return new WaitForSeconds(0.05f);
         }
-        yield return new WaitForSeconds(2.0f);
-        for (i = point; i >= 0; i--)
+        yield return new WaitForSeconds(1.5f);
+
+        // スコアをポイントエリアに移動追加
+        i = point;
+        while(i > 0)
         {
+            if(i > 30)
+            {
+                div = 10;
+            } else if(i > 10)
+            {
+                div = 5;
+            } else
+            {
+                div = 1;
+            }
+            dscore += div;
+            i -= div;
             TextPoint.GetComponent<Text>().text = i.ToString("D") + "point";
-            TextScore.GetComponent<Text>().text = "Score:" + score.ToString("D4");
-            score++;
+            TextScore.GetComponent<Text>().text = "Score:" + dscore.ToString("D4");
             yield return new WaitForSeconds(0.05f);
         }
     }
