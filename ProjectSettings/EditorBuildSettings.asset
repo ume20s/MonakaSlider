@@ -18,6 +18,27 @@ EditorBuildSettings:
     path: Assets/Game3Scene.unity
     guid: 1dfdee7e3537d4140932fc88774cb858
   - enabled: 1
+    path: Assets/Game4Scene.unity
+    guid: 738818db610693345af136d7885c3b33
+  - enabled: 1
+    path: Assets/Game5Scene.unity
+    guid: 2efa740a76608aa40ac1c90004c7f47a
+  - enabled: 1
+    path: Assets/Game6Scene.unity
+    guid: a9a400cc159e5c645bec91c85d22a0d3
+  - enabled: 1
+    path: Assets/Game7Scene.unity
+    guid: 78080c54347d0424ebe6f8745dd59466
+  - enabled: 1
+    path: Assets/Game8Scene.unity
+    guid: 154ec3168b6ea1646a4955afc9172c09
+  - enabled: 1
+    path: Assets/Game9Scene.unity
+    guid: f3629774477613249a8ac97b036184a1
+  - enabled: 1
+    path: Assets/Game10Scene.unity
+    guid: 40bdc684d5a73234cb3e186c380c02e3
+  - enabled: 1
     path: Assets/GameoverScene.unity
     guid: 21617366111efec47af3596e39669dca
   - enabled: 1

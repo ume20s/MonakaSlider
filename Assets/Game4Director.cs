@@ -295,8 +295,8 @@ public class Game4Director : MonoBehaviour
                     // 現在のスコアを次のステージに受け継ぐ
                     ScoreStrage.Score = score;
 
-                    // ステージ２へ
-                    SceneManager.LoadScene("GameclearScene");
+                    // 次のステージへ
+                    SceneManager.LoadScene("Game5Scene");
                 }
                 break;
 
