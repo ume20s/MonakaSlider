@@ -7,7 +7,7 @@ public class OpeningDirector : MonoBehaviour
 {
     // 効果音関連
     AudioSource audioSource;
-    public AudioClip[] sOpening = new AudioClip[2];
+    public AudioClip[] sOpening = new AudioClip[3];
 
     // Start is called before the first frame update
     void Start()
@@ -15,14 +15,21 @@ public class OpeningDirector : MonoBehaviour
         // 音声のコンポーネントを取得
         audioSource = GetComponent<AudioSource>();
 
-        // ３分の１の確率で鯱もなかソング
-        if (Random.Range(0, 3) == 0)
+        // ランダムで鯱もなかソングか鯱バラード
+        int song = Random.Range(0, 10);
+        switch (song)
         {
-            audioSource.clip = sOpening[0];
-        }
-        else
-        {
-            audioSource.clip = sOpening[1];
+            case 0:
+            case 1:
+            case 2:
+                audioSource.clip = sOpening[0];
+                break;
+            case 3:
+                audioSource.clip = sOpening[1];
+                break;
+            default:
+                audioSource.clip = sOpening[2];
+                break;
         }
         audioSource.Play();
 

@@ -155,6 +155,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sOpening:
   - {fileID: 8300000, guid: 7b80859daf2f2724c8c05e749cbc8564, type: 3}
+  - {fileID: 8300000, guid: 5dd5bf2374fe7c345998bf9260a5a38b, type: 3}
   - {fileID: 8300000, guid: b8fd9a79a9a36174fbdd28f80214016c, type: 3}
 --- !u!4 &464036489
 Transform:
